@@ -9,8 +9,8 @@ using namespace std;
 
 int main(int argc, char ** argv) {
     QApplication app(argc, argv);
-    Viewer window(100,100);
-    window.resize(100,100);
+    Viewer window(1500,1000);
+    window.resize(1500,1000);
     window.setWindowTitle("test");
     window.show();
 
