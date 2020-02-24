@@ -4,8 +4,8 @@ INCLUDEPATH += .
 DEFINES += QT_DEPRECATED_WARNINGS
 
 # Input
-HEADERS += compute.h
-SOURCES += main.cpp
+HEADERS += compute.h viewer.h
+SOURCES += main.cpp viewer.cpp
 
 CONFIG += c++14
 QT += widgets
