@@ -1,45 +1,86 @@
 #include "compute.h"
 
-__global__
-void cuda_init(int N, float *p, float v) {
+__device__
+float2 eval_fc(float2 z, float2 c) {
+    // compute f_c(z) = z^2 + c 
+    // for complex z, c
+    // where real(z) = z.x, im(z) = z.y
+
+    float res_r = z.x*z.x - z.y*z.y + c.x;
+    float res_i = 2*z.x*z.y + c.y;
+
+    return make_float2(res_r, res_i);
+}
+
+__global__ 
+void cuda_iterate(int n_iters, float threshold, 
+                  int W, int H, int* data,
+                  float r_min, float r_max, 
+                  float i_min, float i_max) 
+{
+    // Compute index and stride in the usual way
     int index = blockIdx.x * blockDim.x + threadIdx.x;
     int stride = blockDim.x * gridDim.x;
 
-    for (int i = index; i < N; i += stride) {
-        p[i] = v;
+    for (int k = index; k < W*H; k += stride) {
+        // Compute pixel x,y location
+        int x = k % W;
+        int y = k / W;
+
+        // Compute representative point on the view of the complex plane
+        float r = r_min + (r_max - r_min) / float(W) * float(x);
+        float i = i_min + (i_max - i_min) / float(H) * float(y);
+
+        // Initialize z and c
+        float2 c = make_float2(r, i);
+        float2 z = make_float2(0, 0);
+
+        // Iterate f_c on z
+        int j = 0;
+        for (; j < n_iters; ++j) {
+            z = eval_fc(z, c);
+            // abs(z) > threshold?
+            if (z.x * z.x + z.y * z.y > threshold * threshold) 
+                break;
+            j++;
+        }
+
+        data[k] = j;
     }
 }
 
-__global__
-void cuda_add(int N, float *a, float *b) { 
-    int index = blockIdx.x * blockDim.x + threadIdx.x;
-    int stride = blockDim.x * gridDim.x;
-
-    for (int i = index; i < N; i += stride) {
-        b[i] += a[i];
-    }
+FractalCompute::FractalCompute(int buffer_w, int buffer_h) :
+    W(buffer_w), 
+    H(buffer_h) 
+{
+    cudaMallocManaged(&gpu_data, sizeof(int) * W * H);
 }
 
-float compute() {
-    int N = 1000000;
-    float *a, *b;
+FractalCompute::~FractalCompute() {
+    cudaFree(gpu_data);
+}
 
-    cudaMallocManaged(&a, sizeof(float) * N);
-    cudaMallocManaged(&b, sizeof(float) * N);
+#define N_ITERS 100
+#define THRESHOLD 2
 
+void FractalCompute::computeView(float r_min, float r_max, float i_min, float i_max) {
     int blockSize = 128;
-    int nBlocks = (N + blockSize - 1) / blockSize;
+    int nBlocks = (W*H + blockSize - 1) / blockSize;
 
-    cuda_init<<<nBlocks, blockSize>>>(N, a, 1.0);
-    cuda_init<<<nBlocks, blockSize>>>(N, b, 2.0);
-    cuda_add<<<nBlocks, blockSize>>>(N, a, b);
+    cuda_iterate<<<nBlocks, blockSize>>>(N_ITERS, THRESHOLD, W, H, gpu_data, r_min, r_max, i_min, i_max);
+}
+
+// Fills a preallocated image data array in RGBA format
+// with the computed fractal image
+void FractalCompute::fillImageData(unsigned char * data) {
 
     cudaDeviceSynchronize();
 
-    float err = 0.0;
-
-    for (int i = 0; i < N; ++i) 
-        err += (b[i] - 3.0);
-
-    return err;
+    for (int i = 0; i < W*H; ++i) {
+        int val = gpu_data[i] < N_ITERS ? 255 : 0;
+        data[4*i + 0] = val; // R
+        data[4*i + 1] = val; // G
+        data[4*i + 2] = val; // B
+        data[4*i + 3] = 255; // A
+    }
 }
