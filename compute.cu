@@ -1,6 +1,4 @@
 #include "compute.h"
-#include "cuda.h"
-#include "cuda_runtime.h"
 
 __global__
 void cuda_init(int N, float *p, float v) {
