@@ -24,7 +24,7 @@ Viewer::Viewer(int buffer_W, int buffer_H, QWidget *parent) :
     view_i_max(1),
     view_target_r(-0.5),
     view_target_i(0),
-    zooming(false)
+    zooming(0)
 {
     memset(image.bits(), 0xff, W*H*4);
 }
@@ -36,7 +36,13 @@ void Viewer::update() {
     if (hue_offset < -360) hue_offset += 360;
 
     // Parameters for zoom and scroll speed
-    float zoom_factor = zooming ? 0.98 : 1;
+    float zoom_factor;
+    if (zooming == 1)
+        zoom_factor = 0.98;
+    else if (zooming == -1)
+        zoom_factor = 1.0 / 0.98;
+    else
+        zoom_factor = 1.0;
     float shift_factor = 0.97;
 
     // Compute view center and dimensions
@@ -112,10 +118,13 @@ void Viewer::mouseMoveEvent(QMouseEvent *event) {
     view_target_i = view_i_min + i_height * fy;
 }
 
-void Viewer::mousePressEvent(QMouseEvent *) {
-    zooming = true;
+void Viewer::mousePressEvent(QMouseEvent *event) {
+    if (event->button() & Qt::LeftButton)
+        zooming = 1;
+    if (event->button() & Qt::RightButton)
+        zooming = -1;
 }
 
 void Viewer::mouseReleaseEvent(QMouseEvent *) {
-    zooming = false;
+    zooming = 0;
 }

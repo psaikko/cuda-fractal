@@ -45,5 +45,5 @@ class Viewer : public QWidget {
         float view_target_r;
         float view_target_i;
 
-        bool zooming;
+        int zooming;
 };
