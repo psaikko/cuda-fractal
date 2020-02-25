@@ -22,5 +22,6 @@ Run `./cuda-fractal` to launch the app.
 
 ## TODOs:
 
-- Add interactivity
+- Compute HSV->RGB on GPU
+- Increase precision for zooming
 - Optimize CUDA code
