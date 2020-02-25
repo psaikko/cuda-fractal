@@ -36,4 +36,7 @@ class Viewer : public QWidget {
         float view_r_max;
         float view_i_min;
         float view_i_max;
+
+        float view_target_r;
+        float view_target_i;
 };
