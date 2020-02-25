@@ -6,11 +6,14 @@ public:
     ~FractalCompute();
 
     void computeView(double r_min=-2, double r_max=1, double i_min=-1, double i_max=1);
-    const double * getData();
+    const unsigned char * getData();
 
 private:
 
-    double *gpu_data;
+    float *gpu_data;
+    unsigned char *hsv_buffer;
+    unsigned char *rgb_buffer;
+
     int W;
     int H;
 };

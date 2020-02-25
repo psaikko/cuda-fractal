@@ -1,4 +1,5 @@
 #include "fractalcompute.h"
+#include <npp.h>
 
 __device__
 double2 eval_fc(double2 z, double2 c) {
@@ -14,7 +15,7 @@ double2 eval_fc(double2 z, double2 c) {
 
 __global__ 
 void cuda_iterate(int n_iters, double threshold, 
-                  int W, int H, double* data,
+                  int W, int H, float* data,
                   double r_min, double r_max, 
                   double i_min, double i_max) 
 {
@@ -45,7 +46,24 @@ void cuda_iterate(int n_iters, double threshold,
             j++;
         }
 
-        data[k] = double(j) / double(n_iters);
+        data[k] = float(j) / float(n_iters);
+    }
+}
+
+__global__
+void depth_to_hsv(int W, int H, float* depth_data, unsigned char *hsv_buffer) {
+    // Compute index and stride in the usual way
+    int index = blockIdx.x * blockDim.x + threadIdx.x;
+    int stride = blockDim.x * gridDim.x;
+
+    for (int k = index; k < W*H; k += stride) { 
+        unsigned char h = depth_data[k] * 255.0;
+        unsigned char v = abs(depth_data[k] - 1.0) > 1e-4 ? 255 : 0;
+
+        hsv_buffer[k*4 + 0] = h;   // H
+        hsv_buffer[k*4 + 1] = 255; // S [0: white, 255: saturated]
+        hsv_buffer[k*4 + 2] = v;   // V [0: black, 255: color]
+        hsv_buffer[k*4 + 3] = 255; // A
     }
 }
 
@@ -53,14 +71,19 @@ FractalCompute::FractalCompute(int buffer_w, int buffer_h) :
     W(buffer_w), 
     H(buffer_h) 
 {
-    cudaMallocManaged(&gpu_data, sizeof(double) * W * H);
+    cudaMallocManaged(&gpu_data, sizeof(float) * W * H);
+    cudaMallocManaged(&hsv_buffer, sizeof(unsigned char) * 4 * W * H);
+    cudaMallocManaged(&rgb_buffer, sizeof(unsigned char) * 4 * W * H);
+    memset(rgb_buffer, 255, 4*W*H);
 }
 
 FractalCompute::~FractalCompute() {
     cudaFree(gpu_data);
+    cudaFree(hsv_buffer);
+    cudaFree(rgb_buffer);
 }
 
-#define N_ITERS 1000
+#define N_ITERS 600
 #define THRESHOLD 2
 
 void FractalCompute::computeView(double r_min, double r_max, double i_min, double i_max) {
@@ -68,9 +91,11 @@ void FractalCompute::computeView(double r_min, double r_max, double i_min, doubl
     int nBlocks = (W*H + blockSize - 1) / blockSize;
 
     cuda_iterate<<<nBlocks, blockSize>>>(N_ITERS, THRESHOLD, W, H, gpu_data, r_min, r_max, i_min, i_max);
+    depth_to_hsv<<<nBlocks, blockSize>>>(W, H, gpu_data, hsv_buffer);
+    nppiHSVToRGB_8u_AC4R(hsv_buffer, 4 * W, rgb_buffer, 4 * W, {W, H});
 }
 
-const double * FractalCompute::getData() {
+const unsigned char * FractalCompute::getData() {
     cudaDeviceSynchronize();
-    return gpu_data;
+    return rgb_buffer;
 }

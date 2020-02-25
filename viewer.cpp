@@ -77,28 +77,12 @@ void Viewer::paintEvent(QPaintEvent *) {
     p.setRenderHint(QPainter::SmoothPixmapTransform);
 
     fc.computeView(view_r_min, view_r_max, view_i_min, view_i_max);
-    const double * data = fc.getData();
-    unsigned char * imdata = image.bits();
+    const unsigned char * data = fc.getData();
 
     auto mid_t = high_resolution_clock::now();
-
-    for (int i = 0; i < W*H; ++i) {
-        QColor c;
-        if (abs(data[i] - 1.0) < 1e-4) {
-            c = QColor::fromRgb(0,0,0);
-        } else {
-            int h = (hue_end - hue_begin) * sqrt(data[i]) + hue_begin + hue_offset;
-            h %= 360;
-            c = QColor::fromHsv(h,255,255);
-        }
-        int r, g, b;
-        c.getRgb(&r, &g, &b);
-        imdata[4*i + 0] = r;
-        imdata[4*i + 1] = g;
-        imdata[4*i + 2] = b;
-        imdata[4*i + 3] = 255;
-    }
-
+    
+    unsigned char * imdata = image.bits();
+    memcpy(imdata, data, 4*W*H);
     p.drawImage(rect(), image, image.rect());
 
     auto end_t = high_resolution_clock::now();

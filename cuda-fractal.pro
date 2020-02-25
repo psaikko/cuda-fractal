@@ -28,11 +28,11 @@ INCLUDEPATH += $$(CUDA_HOME)/include
 QMAKE_LIBDIR += $$(CUDA_HOME)/lib64
 
 # Add the necessary libraries
-LIBS += -lcuda -lcudart
+LIBS += -lcuda -lcudart -lnppc -lnppicc
 
 # Configuration of the Cuda compiler
 cuda.input = CUDA_SOURCES
 cuda.output = $$CUDA_OBJECTS_DIR/${QMAKE_FILE_BASE}_cuda.o
-cuda.commands = $$(CUDA_HOME)/bin/nvcc -c -o ${QMAKE_FILE_OUT} ${QMAKE_FILE_NAME}
+cuda.commands = $$(CUDA_HOME)/bin/nvcc -lnppc -lnppicc -c -o ${QMAKE_FILE_OUT} ${QMAKE_FILE_NAME}
 cuda.dependency_type = TYPE_C
 QMAKE_EXTRA_COMPILERS += cuda
