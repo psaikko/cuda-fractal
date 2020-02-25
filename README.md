@@ -13,3 +13,15 @@ Fractal viewer Qt app powered by CUDA
 - Generate a makefile with `qmake`
 
 - Compile the binary with `make`
+
+## execution
+
+Run `./cuda-fractal` to launch the app. 
+
+![](./img/fractal.png)
+
+## TODOs:
+
+- Colorize image based on iteration counts
+- Add interactivity
+- Optimize CUDA code
