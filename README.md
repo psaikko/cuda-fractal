@@ -18,10 +18,11 @@ Fractal viewer Qt app powered by CUDA
 
 Run `./cuda-fractal` to launch the app. 
 
+Move the view with mouse, click left or right button to zoom in or out.
+
 ![](./img/fractal.png)
 
 ## TODOs:
 
-- Compute HSV->RGB on GPU
 - Increase precision for zooming
 - Optimize CUDA code
