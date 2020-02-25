@@ -18,15 +18,22 @@ class Viewer : public QWidget {
         void mouseMoveEvent(QMouseEvent *event);
 
     private:
-
+        // Data buffer dimensions
         int W;
         int H;
         
         QImage image;
         FractalCompute fc;
 
+        // Parameters for mapping iteration counts to hues
         float hue_offset;
         float hue_update;
         int hue_begin;
         int hue_end;
+
+        // Bounds for real and imaginary components displayed
+        float view_r_min;
+        float view_r_max;
+        float view_i_min;
+        float view_i_max;
 };

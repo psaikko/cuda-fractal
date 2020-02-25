@@ -1,8 +1,12 @@
 #include "viewer.h"
 
 #include <sstream>
+#include <chrono>
 #include <QPainter>
 #include <QMouseEvent>
+
+using namespace std;
+using namespace std::chrono;
 
 Viewer::Viewer(int buffer_W, int buffer_H, QWidget *parent) : 
     QWidget(parent), 
@@ -13,7 +17,11 @@ Viewer::Viewer(int buffer_W, int buffer_H, QWidget *parent) :
     hue_offset(0),
     hue_update(1),
     hue_begin(359),
-    hue_end(60)
+    hue_end(60),
+    view_r_min(-2),
+    view_r_max(1),
+    view_i_min(-1),
+    view_i_max(1)
 {
     memset(image.bits(), 0xff, W*H*4);
 }
@@ -26,10 +34,13 @@ void Viewer::update() {
 }
 
 void Viewer::paintEvent(QPaintEvent *) {
+
+    auto start_t = high_resolution_clock::now();
+
     QPainter p(this);
     p.setRenderHint(QPainter::SmoothPixmapTransform);
 
-    fc.computeView();
+    fc.computeView(view_r_min, view_r_max, view_i_min, view_i_max);
     const float * data = fc.getData();
     unsigned char * imdata = image.bits();
 
@@ -51,10 +62,15 @@ void Viewer::paintEvent(QPaintEvent *) {
     }
 
     p.drawImage(rect(), image, image.rect());
+
+    auto end_t = high_resolution_clock::now();
+    auto ms = duration_cast<milliseconds>(end_t - start_t);
+
+    stringstream ss;
+    ss << ms.count() << " ms";
+    setWindowTitle(ss.str().c_str()); 
 }
 
 void Viewer::mouseMoveEvent(QMouseEvent *event) {
-    std::stringstream ss;
-    ss << "Mouse at x=" << event->x() << " y=" << event->y();
-    setWindowTitle(QString::fromStdString(ss.str()));
+
 }
