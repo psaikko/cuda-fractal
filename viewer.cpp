@@ -80,6 +80,8 @@ void Viewer::paintEvent(QPaintEvent *) {
     const double * data = fc.getData();
     unsigned char * imdata = image.bits();
 
+    auto mid_t = high_resolution_clock::now();
+
     for (int i = 0; i < W*H; ++i) {
         QColor c;
         if (abs(data[i] - 1.0) < 1e-4) {
@@ -100,10 +102,11 @@ void Viewer::paintEvent(QPaintEvent *) {
     p.drawImage(rect(), image, image.rect());
 
     auto end_t = high_resolution_clock::now();
-    auto ms = duration_cast<milliseconds>(end_t - start_t);
+    auto cuda_ms = duration_cast<milliseconds>(mid_t - start_t);
+    auto qt_ms = duration_cast<milliseconds>(end_t - mid_t);
 
     stringstream ss;
-    ss << ms.count() << " ms";
+    ss << "[CUDA: " << cuda_ms.count() << " ms] [Qt: " << qt_ms.count() << "ms]";
     setWindowTitle(ss.str().c_str()); 
 }
 
