@@ -5,7 +5,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 # Input
 HEADERS += fractalcompute.h viewer.h
-SOURCES += main.cpp
+SOURCES += main.cpp viewer.cpp
 
 CONFIG += c++14
 QT += widgets
