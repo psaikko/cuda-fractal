@@ -13,9 +13,14 @@ class Viewer : public QWidget {
 
         void update();
 
+    protected:
         void paintEvent(QPaintEvent *);
 
         void mouseMoveEvent(QMouseEvent *event);
+
+        void mousePressEvent(QMouseEvent *event);
+
+        void mouseReleaseEvent(QMouseEvent *event);
 
     private:
         // Data buffer dimensions
@@ -39,4 +44,6 @@ class Viewer : public QWidget {
 
         float view_target_r;
         float view_target_i;
+
+        bool zooming;
 };
