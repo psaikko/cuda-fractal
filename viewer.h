@@ -33,8 +33,6 @@ class Viewer : public QWidget {
         // Parameters for mapping iteration counts to hues
         float hue_offset;
         float hue_update;
-        int hue_begin;
-        int hue_end;
 
         // Bounds for real and imaginary components displayed
         double view_r_min;

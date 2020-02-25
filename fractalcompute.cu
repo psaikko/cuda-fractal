@@ -14,10 +14,10 @@ double2 eval_fc(double2 z, double2 c) {
 }
 
 __global__ 
-void cuda_iterate(int n_iters, double threshold, 
-                  int W, int H, float* data,
-                  double r_min, double r_max, 
-                  double i_min, double i_max) 
+void iterate_points(int n_iters, double threshold, 
+                    int W, int H, float* data,
+                    double r_min, double r_max, 
+                    double i_min, double i_max) 
 {
     // Compute index and stride in the usual way
     int index = blockIdx.x * blockDim.x + threadIdx.x;
@@ -51,13 +51,13 @@ void cuda_iterate(int n_iters, double threshold,
 }
 
 __global__
-void depth_to_hsv(int W, int H, float* depth_data, unsigned char *hsv_buffer) {
+void depth_to_hsv(int W, int H, float* depth_data, unsigned char *hsv_buffer, float hue_offset) {
     // Compute index and stride in the usual way
     int index = blockIdx.x * blockDim.x + threadIdx.x;
     int stride = blockDim.x * gridDim.x;
 
     for (int k = index; k < W*H; k += stride) { 
-        unsigned char h = depth_data[k] * 255.0;
+        unsigned char h = int(depth_data[k] * 255.0 + hue_offset) % 255; 
         unsigned char v = abs(depth_data[k] - 1.0) > 1e-4 ? 255 : 0;
 
         hsv_buffer[k*4 + 0] = h;   // H
@@ -86,12 +86,12 @@ FractalCompute::~FractalCompute() {
 #define N_ITERS 600
 #define THRESHOLD 2
 
-void FractalCompute::computeView(double r_min, double r_max, double i_min, double i_max) {
+void FractalCompute::computeView(double r_min, double r_max, double i_min, double i_max, float hue_offset) {
     int blockSize = 128;
     int nBlocks = (W*H + blockSize - 1) / blockSize;
 
-    cuda_iterate<<<nBlocks, blockSize>>>(N_ITERS, THRESHOLD, W, H, gpu_data, r_min, r_max, i_min, i_max);
-    depth_to_hsv<<<nBlocks, blockSize>>>(W, H, gpu_data, hsv_buffer);
+    iterate_points<<<nBlocks, blockSize>>>(N_ITERS, THRESHOLD, W, H, gpu_data, r_min, r_max, i_min, i_max);
+    depth_to_hsv<<<nBlocks, blockSize>>>(W, H, gpu_data, hsv_buffer, hue_offset);
     nppiHSVToRGB_8u_AC4R(hsv_buffer, 4 * W, rgb_buffer, 4 * W, {W, H});
 }
 

@@ -15,9 +15,7 @@ Viewer::Viewer(int buffer_W, int buffer_H, QWidget *parent) :
     image(W, H, QImage::Format::Format_RGBA8888),
     fc(W, H),
     hue_offset(0),
-    hue_update(1),
-    hue_begin(359),
-    hue_end(60),
+    hue_update(0.2),
     view_r_min(-2),
     view_r_max(1),
     view_i_min(-1),
@@ -32,8 +30,8 @@ Viewer::Viewer(int buffer_W, int buffer_H, QWidget *parent) :
 void Viewer::update() {
     // Update hue values
     hue_offset += hue_update;
-    if (hue_offset > 360) hue_offset -= 360;
-    if (hue_offset < -360) hue_offset += 360;
+    if (hue_offset > 255) hue_offset -= 255;
+    if (hue_offset < -255) hue_offset += 255;
 
     // Parameters for zoom and scroll speed
     double zoom_factor;
@@ -76,11 +74,11 @@ void Viewer::paintEvent(QPaintEvent *) {
     QPainter p(this);
     p.setRenderHint(QPainter::SmoothPixmapTransform);
 
-    fc.computeView(view_r_min, view_r_max, view_i_min, view_i_max);
+    fc.computeView(view_r_min, view_r_max, view_i_min, view_i_max, hue_offset);
     const unsigned char * data = fc.getData();
 
     auto mid_t = high_resolution_clock::now();
-    
+
     unsigned char * imdata = image.bits();
     memcpy(imdata, data, 4*W*H);
     p.drawImage(rect(), image, image.rect());
