@@ -15,7 +15,8 @@ int main(int argc, char ** argv) {
     QApplication app(argc, argv);
     Viewer window(1500,1000);
     window.resize(1500,1000);
-    window.setWindowTitle("test");
+    window.setWindowTitle("Fractal viewer");
+    window.setMouseTracking(true);
     window.show();
 
     QTimer screen_update_timer;

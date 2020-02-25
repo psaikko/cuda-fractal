@@ -1,6 +1,8 @@
 #include "viewer.h"
 
+#include <sstream>
 #include <QPainter>
+#include <QMouseEvent>
 
 Viewer::Viewer(int buffer_W, int buffer_H, QWidget *parent) : 
     QWidget(parent), 
@@ -49,4 +51,10 @@ void Viewer::paintEvent(QPaintEvent *) {
     }
 
     p.drawImage(rect(), image, image.rect());
+}
+
+void Viewer::mouseMoveEvent(QMouseEvent *event) {
+    std::stringstream ss;
+    ss << "Mouse at x=" << event->x() << " y=" << event->y();
+    setWindowTitle(QString::fromStdString(ss.str()));
 }

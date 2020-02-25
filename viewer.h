@@ -15,6 +15,8 @@ class Viewer : public QWidget {
 
         void paintEvent(QPaintEvent *);
 
+        void mouseMoveEvent(QMouseEvent *event);
+
     private:
 
         int W;
