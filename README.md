@@ -22,6 +22,5 @@ Run `./cuda-fractal` to launch the app.
 
 ## TODOs:
 
-- Colorize image based on iteration counts
 - Add interactivity
 - Optimize CUDA code
