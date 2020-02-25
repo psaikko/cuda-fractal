@@ -25,6 +25,7 @@ class Viewer : public QWidget {
 
         void paintEvent(QPaintEvent *) {
             QPainter p(this);
+            p.setRenderHint(QPainter::SmoothPixmapTransform);
 
             fc.computeView();
             const float * data = fc.getData();
