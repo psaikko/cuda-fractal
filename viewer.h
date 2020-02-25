@@ -8,8 +8,8 @@
 
 #include "fractalcompute.h"
 
-#define HUE_START 0
-#define HUE_END 300
+#define HUE_START 359
+#define HUE_END 60
 
 class Viewer : public QWidget {
     public:
@@ -35,7 +35,7 @@ class Viewer : public QWidget {
                 if (abs(data[i] - 1.0) < 1e-4) {
                     c = QColor::fromRgb(0,0,0);
                 } else {
-                    int h = (HUE_END - HUE_START) * data[i] + HUE_START;
+                    int h = (HUE_END - HUE_START) * sqrt(data[i]) + HUE_START;
                     c = QColor::fromHsv(h,255,255);
                 }
                 int r, g, b;
