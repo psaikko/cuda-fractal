@@ -60,7 +60,7 @@ FractalCompute::~FractalCompute() {
     cudaFree(gpu_data);
 }
 
-#define N_ITERS 100
+#define N_ITERS 1000
 #define THRESHOLD 2
 
 void FractalCompute::computeView(float r_min, float r_max, float i_min, float i_max) {
