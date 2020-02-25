@@ -8,9 +8,6 @@
 
 #include "fractalcompute.h"
 
-#define HUE_START 359
-#define HUE_END 60
-
 class Viewer : public QWidget {
     public:
         Viewer(int buffer_W, int buffer_H, QWidget *parent=0) : 
@@ -18,9 +15,20 @@ class Viewer : public QWidget {
             W(buffer_W), 
             H(buffer_H),
             image(W, H, QImage::Format::Format_RGBA8888),
-            fc(W, H)
+            fc(W, H),
+            hue_offset(0),
+            hue_update(1),
+            hue_begin(359),
+            hue_end(60)
         {
             memset(image.bits(), 0xff, W*H*4);
+        }
+
+        void update() {
+            hue_offset += hue_update;
+            if (hue_offset > 360) hue_offset -= 360;
+            if (hue_offset < -360) hue_offset += 360;
+            QWidget::update(rect());
         }
 
         void paintEvent(QPaintEvent *) {
@@ -36,7 +44,8 @@ class Viewer : public QWidget {
                 if (abs(data[i] - 1.0) < 1e-4) {
                     c = QColor::fromRgb(0,0,0);
                 } else {
-                    int h = (HUE_END - HUE_START) * sqrt(data[i]) + HUE_START;
+                    int h = (hue_end - hue_begin) * sqrt(data[i]) + hue_begin + hue_offset;
+                    h %= 360;
                     c = QColor::fromHsv(h,255,255);
                 }
                 int r, g, b;
@@ -54,6 +63,12 @@ class Viewer : public QWidget {
 
         int W;
         int H;
+        
         QImage image;
         FractalCompute fc;
+
+        float hue_offset;
+        float hue_update;
+        int hue_begin;
+        int hue_end;
 };
