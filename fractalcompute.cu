@@ -1,4 +1,4 @@
-#include "compute.h"
+#include "fractalcompute.h"
 
 __device__
 float2 eval_fc(float2 z, float2 c) {
@@ -14,7 +14,7 @@ float2 eval_fc(float2 z, float2 c) {
 
 __global__ 
 void cuda_iterate(int n_iters, float threshold, 
-                  int W, int H, int* data,
+                  int W, int H, float* data,
                   float r_min, float r_max, 
                   float i_min, float i_max) 
 {
@@ -45,7 +45,7 @@ void cuda_iterate(int n_iters, float threshold,
             j++;
         }
 
-        data[k] = j;
+        data[k] = float(j) / float(n_iters);
     }
 }
 
@@ -70,17 +70,7 @@ void FractalCompute::computeView(float r_min, float r_max, float i_min, float i_
     cuda_iterate<<<nBlocks, blockSize>>>(N_ITERS, THRESHOLD, W, H, gpu_data, r_min, r_max, i_min, i_max);
 }
 
-// Fills a preallocated image data array in RGBA format
-// with the computed fractal image
-void FractalCompute::fillImageData(unsigned char * data) {
-
+const float * FractalCompute::getData() {
     cudaDeviceSynchronize();
-
-    for (int i = 0; i < W*H; ++i) {
-        int val = gpu_data[i] < N_ITERS ? 255 : 0;
-        data[4*i + 0] = val; // R
-        data[4*i + 1] = val; // G
-        data[4*i + 2] = val; // B
-        data[4*i + 3] = 255; // A
-    }
+    return gpu_data;
 }

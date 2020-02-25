@@ -6,7 +6,7 @@
 #include <QImage>
 #include <QPainter>
 
-#include "compute.h"
+#include "fractalcompute.h"
 
 class Viewer : public QWidget {
     public:
@@ -24,7 +24,23 @@ class Viewer : public QWidget {
             QPainter p(this);
 
             fc.computeView();
-            fc.fillImageData(image.bits());
+            const float * data = fc.getData();
+            unsigned char * imdata = image.bits();
+
+            for (int i = 0; i < W*H; ++i) {
+                QColor c;
+                if (abs(data[i] - 1.0) < 1e-4) {
+                    c = QColor::fromRgb(0,0,0);
+                } else {
+                    c = QColor::fromHsv(int(data[i]*360),255,255);
+                }
+                int r, g, b;
+                c.getRgb(&r, &g, &b);
+                imdata[4*i + 0] = r;
+                imdata[4*i + 1] = g;
+                imdata[4*i + 2] = b;
+                imdata[4*i + 3] = 255;
+            }
 
             p.drawImage(rect(), image, image.rect());
         }

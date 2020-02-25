@@ -6,10 +6,11 @@ public:
     ~FractalCompute();
 
     void computeView(float r_min=-2, float r_max=1, float i_min=-1, float i_max=1);
-    void fillImageData(unsigned char * data);
+    const float * getData();
 
 private:
-    int *gpu_data;
+
+    float *gpu_data;
     int W;
     int H;
 };

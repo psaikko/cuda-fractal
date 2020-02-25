@@ -4,7 +4,7 @@ INCLUDEPATH += .
 DEFINES += QT_DEPRECATED_WARNINGS
 
 # Input
-HEADERS += compute.h viewer.h
+HEADERS += fractalcompute.h viewer.h
 SOURCES += main.cpp viewer.cpp
 
 CONFIG += c++14
@@ -19,7 +19,7 @@ QT += widgets
 CUDA_OBJECTS_DIR = release/cuda
 
 # CUDA settings
-CUDA_SOURCES += compute.cu
+CUDA_SOURCES += fractalcompute.cu
 
 # include paths
 INCLUDEPATH += $$(CUDA_HOME)/include
