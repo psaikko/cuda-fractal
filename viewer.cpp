@@ -36,30 +36,30 @@ void Viewer::update() {
     if (hue_offset < -360) hue_offset += 360;
 
     // Parameters for zoom and scroll speed
-    float zoom_factor;
+    double zoom_factor;
     if (zooming == 1)
         zoom_factor = 0.98;
     else if (zooming == -1)
         zoom_factor = 1.0 / 0.98;
     else
         zoom_factor = 1.0;
-    float shift_factor = 0.97;
+    double shift_factor = 0.97;
 
     // Compute view center and dimensions
-    float r_width = view_r_max - view_r_min;
-    float i_height = view_i_max - view_i_min;
+    double r_width = view_r_max - view_r_min;
+    double i_height = view_i_max - view_i_min;
 
-    float view_center_r = view_r_min + r_width / 2;
-    float view_center_i = view_i_min + i_height / 2;
+    double view_center_r = view_r_min + r_width / 2;
+    double view_center_i = view_i_min + i_height / 2;
 
     // Re-center view on mouse with zoom applied;
-    float target_width = r_width * zoom_factor;
-    float target_height = i_height * zoom_factor;
+    double target_width = r_width * zoom_factor;
+    double target_height = i_height * zoom_factor;
 
-    float shift_to_r = view_center_r * (shift_factor) +
-                       view_target_r * (1 - shift_factor); 
-    float shift_to_i = view_center_i * (shift_factor) +
-                       view_target_i * (1 - shift_factor);
+    double shift_to_r = view_center_r * (shift_factor) +
+                        view_target_r * (1 - shift_factor); 
+    double shift_to_i = view_center_i * (shift_factor) +
+                        view_target_i * (1 - shift_factor);
 
     view_r_min = shift_to_r - target_width / 2;
     view_r_max = shift_to_r + target_width / 2;
@@ -77,7 +77,7 @@ void Viewer::paintEvent(QPaintEvent *) {
     p.setRenderHint(QPainter::SmoothPixmapTransform);
 
     fc.computeView(view_r_min, view_r_max, view_i_min, view_i_max);
-    const float * data = fc.getData();
+    const double * data = fc.getData();
     unsigned char * imdata = image.bits();
 
     for (int i = 0; i < W*H; ++i) {
@@ -108,12 +108,12 @@ void Viewer::paintEvent(QPaintEvent *) {
 }
 
 void Viewer::mouseMoveEvent(QMouseEvent *event) {
-    float fx = float(event->x()) / float(width());
-    float fy = float(event->y()) / float(height());
+    double fx = double(event->x()) / double(width());
+    double fy = double(event->y()) / double(height());
 
     // Compute new center
-    float r_width = view_r_max - view_r_min;
-    float i_height = view_i_max - view_i_min;
+    double r_width = view_r_max - view_r_min;
+    double i_height = view_i_max - view_i_min;
     view_target_r = view_r_min + r_width * fx;
     view_target_i = view_i_min + i_height * fy;
 }

@@ -37,13 +37,13 @@ class Viewer : public QWidget {
         int hue_end;
 
         // Bounds for real and imaginary components displayed
-        float view_r_min;
-        float view_r_max;
-        float view_i_min;
-        float view_i_max;
+        double view_r_min;
+        double view_r_max;
+        double view_i_min;
+        double view_i_max;
 
-        float view_target_r;
-        float view_target_i;
+        double view_target_r;
+        double view_target_i;
 
         int zooming;
 };

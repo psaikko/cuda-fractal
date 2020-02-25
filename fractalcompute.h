@@ -5,12 +5,12 @@ public:
     FractalCompute(int buffer_w, int buffer_h);
     ~FractalCompute();
 
-    void computeView(float r_min=-2, float r_max=1, float i_min=-1, float i_max=1);
-    const float * getData();
+    void computeView(double r_min=-2, double r_max=1, double i_min=-1, double i_max=1);
+    const double * getData();
 
 private:
 
-    float *gpu_data;
+    double *gpu_data;
     int W;
     int H;
 };
